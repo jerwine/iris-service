@@ -12,6 +12,8 @@ public interface IrisService {
 
 	Flux<IrisDTO> getAllIris();
 
+	Flux<IrisDTO> getAllSpecies();
+
 	Flux<IrisDTO> getIrisBySpecies( String species );
 
 	Flux<IrisDTO> saveIris( Publisher<IrisDTO> irises );

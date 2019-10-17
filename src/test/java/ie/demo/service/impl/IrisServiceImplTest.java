@@ -13,10 +13,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import ie.demo.api.mapper.IrisMapper;
+import ie.demo.api.mapper.IrisSpeciesMapper;
+import ie.demo.api.mapper.impl.IrisSpeciesMapperImpl;
 import ie.demo.api.model.IrisDTO;
 import ie.demo.domain.Iris;
 import ie.demo.repository.IrisRepository;
@@ -30,6 +36,8 @@ public class IrisServiceImplTest {
 
 	IrisMapper irisMapper;
 	IrisRepository irisRepository;
+	ReactiveMongoTemplate reactiveMongoTemplate;
+	IrisSpeciesMapper irisSpeciesMapper;
 
 	IrisService irisService;
 
@@ -37,7 +45,8 @@ public class IrisServiceImplTest {
 	static final String SPECIES = "randomspecies";
 
 	static final String ID2 = "someid";
-	static final String SPECIES2 = "randomspecies";
+	static final String SPECIES2 = "anotherrandomspecies";
+	static final String SPECIES3 = "onemorerandomspecies";
 
 	static final Iris IRIS = Iris.builder()
 			.id( ID )
@@ -75,11 +84,17 @@ public class IrisServiceImplTest {
 			.sepalWidth( BigDecimal.ONE )
 		.build();
 
+	static final IrisDTO SPECIES_1 = IrisDTO.builder().species( SPECIES ).build();
+	static final IrisDTO SPECIES_2 = IrisDTO.builder().species( SPECIES2 ).build();
+	static final IrisDTO SPECIES_3 = IrisDTO.builder().species( SPECIES3 ).build();
+
 	@Before
 	public void setUp() throws Exception {
 		irisMapper = Mockito.mock( IrisMapper.class );
 		irisRepository = Mockito.mock( IrisRepository.class );
-		irisService = new IrisServiceImpl( irisMapper, irisRepository );
+		reactiveMongoTemplate = Mockito.mock( ReactiveMongoTemplate.class );
+		irisSpeciesMapper = Mockito.mock( IrisSpeciesMapper.class );
+		irisService = new IrisServiceImpl( irisMapper, irisRepository, reactiveMongoTemplate, irisSpeciesMapper );
 	}
 
 	@Test
@@ -108,6 +123,23 @@ public class IrisServiceImplTest {
 		assertEquals( result.count().block().toString(), "2" );
 		assertTrue( result.blockFirst().equals( IRISDTO ) );
 		assertTrue( result.blockLast().equals( IRISDTO2 ) );
+	}
+
+	@Test
+	public void getAllSpecies() {
+
+		when( reactiveMongoTemplate.findDistinct( new Query(), "species", "iris", String.class ) ).thenReturn( Flux.just( SPECIES, SPECIES2, SPECIES3 ) );
+		when( irisSpeciesMapper.toIrisDTO( SPECIES ) ).thenReturn( SPECIES_1 );
+		when( irisSpeciesMapper.toIrisDTO( SPECIES2 ) ).thenReturn( SPECIES_2 );
+		when( irisSpeciesMapper.toIrisDTO( SPECIES3 ) ).thenReturn( SPECIES_3 );
+
+		Flux<IrisDTO>result = irisService.getAllSpecies();
+
+		assertEquals( result.blockFirst().getSpecies(), SPECIES );
+		assertEquals( result.blockLast().getSpecies(), SPECIES3 );
+		assertEquals( result.count().block().toString(), "3" );
+		assertTrue( result.blockFirst().equals( SPECIES_1 ) );
+		assertTrue( result.blockLast().equals( SPECIES_3 ) );
 	}
 
 	@Test

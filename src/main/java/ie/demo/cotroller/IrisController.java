@@ -38,6 +38,12 @@ public class IrisController {
 		return irisService.getIrisById( id );
 	}
 
+	@GetMapping("/species")
+	@ResponseStatus( HttpStatus.OK )
+	public Flux<IrisDTO> getAllSpecies() {
+		return irisService.getAllSpecies();
+	}
+
 	@GetMapping("/species/{species}")
 	@ResponseStatus( HttpStatus.OK )
 	public Flux<IrisDTO> getIrisBySpecies( @PathVariable String species ) {

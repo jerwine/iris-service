@@ -1,11 +1,13 @@
 package ie.demo.service.impl;
 
 import org.reactivestreams.Publisher;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import ie.demo.api.mapper.IrisMapper;
+import ie.demo.api.mapper.IrisSpeciesMapper;
 import ie.demo.api.model.IrisDTO;
-import ie.demo.domain.Iris;
 import ie.demo.repository.IrisRepository;
 import ie.demo.service.IrisService;
 import reactor.core.publisher.Flux;
@@ -16,10 +18,15 @@ public class IrisServiceImpl implements IrisService {
 
 	final IrisMapper irisMapper;
 	final IrisRepository irisRepository;
+	final ReactiveMongoTemplate reactiveMongoTemplate;
+	final IrisSpeciesMapper irisSpeciesMapper;
 
-	public IrisServiceImpl(IrisMapper irisMapper, IrisRepository irisRepository) {
+	public IrisServiceImpl( IrisMapper irisMapper, IrisRepository irisRepository,
+			ReactiveMongoTemplate reactiveMongoTemplate, IrisSpeciesMapper irisSpeciesMapper ) {
 		this.irisMapper = irisMapper;
 		this.irisRepository = irisRepository;
+		this.reactiveMongoTemplate = reactiveMongoTemplate;
+		this.irisSpeciesMapper = irisSpeciesMapper;
 	}
 
 	/*
@@ -39,6 +46,14 @@ public class IrisServiceImpl implements IrisService {
 	}
 
 	/*
+	 * @see ie.demo.service.IrisService#getAllSpecies()
+	 */
+	@Override
+	public Flux<IrisDTO> getAllSpecies() {
+		return reactiveMongoTemplate.findDistinct( new Query(), "species", "iris", String.class ).map( irisSpeciesMapper :: toIrisDTO );
+	}
+	
+	/*
 	 * @see ie.demo.service.IrisService#getIrisBySpecies(java.lang.String)
 	 */
 	public Flux<IrisDTO> getIrisBySpecies( String species ) {
@@ -50,10 +65,9 @@ public class IrisServiceImpl implements IrisService {
 	 */
 	@Override
 	public Flux<IrisDTO> saveIris( Publisher<IrisDTO> irises ) {
-		Flux<Iris> saved = Flux.from( irises )
+		return Flux.from( irises )
 			.map( irisMapper :: toIris )
-			.publish( irisRepository:: saveAll );
-		return Flux.from( saved )
+			.publish( irisRepository:: saveAll )
 			.map( irisMapper :: toIrisDTO );
 	}
 

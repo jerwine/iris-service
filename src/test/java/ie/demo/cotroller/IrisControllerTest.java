@@ -70,6 +70,21 @@ public class IrisControllerTest {
 	}
 
 	@Test
+	public void getAllSpecies() {
+		BDDMockito.given( irisService.getAllSpecies())
+			.willReturn( Flux.just( 
+					IrisDTO.builder().species( "setosa" ).build(),
+					IrisDTO.builder().species( "versicolor" ).build(),
+					IrisDTO.builder().species( "virginica" ).build() ) );
+
+		webTestClient.get()
+			.uri( "/irises/species" )
+			.exchange()
+			.expectBodyList( IrisDTO.class )
+			.hasSize( 3 );
+	}
+
+	@Test
 	public void getIrisBySpecies() {
 		BDDMockito.given( irisService.getIrisBySpecies( "setosa" ) )
 			.willReturn(
