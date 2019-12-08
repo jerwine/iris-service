@@ -1,6 +1,7 @@
 package ie.demo.service.impl;
 
 import org.reactivestreams.Publisher;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -38,11 +39,11 @@ public class IrisServiceImpl implements IrisService {
 	}
 
 	/*
-	 * @see ie.demo.service.IrisService#getAllIris()
+	 * @see ie.demo.service.IrisService#getAllIris(org.springframework.data.domain.Pageable)
 	 */
 	@Override
-	public Flux<IrisDTO> getAllIris() {
-		return irisRepository.findAll().map( irisMapper :: toIrisDTO );
+	public Flux<IrisDTO> getAllIris( Pageable pageable ) {
+		return irisRepository.retrieveAllPageable( pageable ).map( irisMapper :: toIrisDTO );
 	}
 
 	/*
@@ -52,12 +53,12 @@ public class IrisServiceImpl implements IrisService {
 	public Flux<IrisDTO> getAllSpecies() {
 		return reactiveMongoTemplate.findDistinct( new Query(), "species", "iris", String.class ).map( irisSpeciesMapper :: toIrisDTO );
 	}
-	
+
 	/*
-	 * @see ie.demo.service.IrisService#getIrisBySpecies(java.lang.String)
+	 * @see ie.demo.service.IrisService#getIrisBySpecies(java.lang.String, org.springframework.data.domain.Pageable)
 	 */
-	public Flux<IrisDTO> getIrisBySpecies( String species ) {
-		return irisRepository.findBySpecies( species ).map( irisMapper :: toIrisDTO );
+	public Flux<IrisDTO> getIrisBySpecies( String species, Pageable pageable ) {
+		return irisRepository.retrieveBySpeciesPageable( species, pageable ).map( irisMapper :: toIrisDTO );
 	}
 
 	/*

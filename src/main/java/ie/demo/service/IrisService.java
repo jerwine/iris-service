@@ -1,6 +1,7 @@
 package ie.demo.service;
 
 import org.reactivestreams.Publisher;
+import org.springframework.data.domain.Pageable;
 
 import ie.demo.api.model.IrisDTO;
 import reactor.core.publisher.Flux;
@@ -10,11 +11,11 @@ public interface IrisService {
 
 	Mono<IrisDTO> getIrisById( String id );
 
-	Flux<IrisDTO> getAllIris();
+	Flux<IrisDTO> getAllIris( Pageable pageable );
 
 	Flux<IrisDTO> getAllSpecies();
 
-	Flux<IrisDTO> getIrisBySpecies( String species );
+	Flux<IrisDTO> getIrisBySpecies( String species, Pageable pageable );
 
 	Flux<IrisDTO> saveIris( Publisher<IrisDTO> irises );
 

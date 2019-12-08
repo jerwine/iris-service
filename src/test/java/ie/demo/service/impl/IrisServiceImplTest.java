@@ -14,15 +14,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
+import org.reactivestreams.Subscriber;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import ie.demo.api.mapper.IrisMapper;
 import ie.demo.api.mapper.IrisSpeciesMapper;
-import ie.demo.api.mapper.impl.IrisSpeciesMapperImpl;
 import ie.demo.api.model.IrisDTO;
 import ie.demo.domain.Iris;
 import ie.demo.repository.IrisRepository;
@@ -88,6 +88,8 @@ public class IrisServiceImplTest {
 	static final IrisDTO SPECIES_2 = IrisDTO.builder().species( SPECIES2 ).build();
 	static final IrisDTO SPECIES_3 = IrisDTO.builder().species( SPECIES3 ).build();
 
+	static final PageRequest defaultPagig = PageRequest.of( 1, 10 );
+
 	@Before
 	public void setUp() throws Exception {
 		irisMapper = Mockito.mock( IrisMapper.class );
@@ -101,7 +103,7 @@ public class IrisServiceImplTest {
 	public void getIrisById() {
 
 		when( irisRepository.findById( ID ) ).thenReturn(  Mono.just( IRIS ) );
-		when( irisMapper.toIrisDTO( any() ) ).thenReturn( IRISDTO );
+		when( irisMapper.toIrisDTO( IRIS ) ).thenReturn( IRISDTO );
 
 		IrisDTO result = irisService.getIrisById( ID ).block();
 
@@ -112,11 +114,11 @@ public class IrisServiceImplTest {
 	@Test
 	public void getAllIris() {
 
-		when( irisRepository.findAll() ).thenReturn( Flux.just( IRIS, IRIS2 ) );
+		when( irisRepository.retrieveAllPageable( defaultPagig ) ).thenReturn( Flux.just( IRIS, IRIS2 ) );
 		when( irisMapper.toIrisDTO( IRIS ) ).thenReturn( IRISDTO );
 		when( irisMapper.toIrisDTO( IRIS2 ) ).thenReturn( IRISDTO2 );
 
-		Flux<IrisDTO>result = irisService.getAllIris();
+		Flux<IrisDTO> result = irisService.getAllIris( defaultPagig );
 
 		assertEquals( result.blockFirst().getId(), ID );
 		assertEquals( result.blockLast().getId(), ID2 );
@@ -145,22 +147,14 @@ public class IrisServiceImplTest {
 	@Test
 	public void getIrisBySpecies() {
 
-		when( irisRepository.findBySpecies( SPECIES ) ).thenReturn( Flux.just( IRIS ) );
-		when( irisRepository.findBySpecies( SPECIES2 ) ).thenReturn( Flux.just( IRIS2 ) );
+		when( irisRepository.retrieveBySpeciesPageable( SPECIES, defaultPagig ) ).thenReturn( Flux.just( IRIS, IRIS2 ) );
 		when( irisMapper.toIrisDTO( IRIS ) ).thenReturn( IRISDTO );
 		when( irisMapper.toIrisDTO( IRIS2 ) ).thenReturn( IRISDTO2 );
 
-		Flux<IrisDTO>result = irisService.getIrisBySpecies( SPECIES );
+		Flux<IrisDTO>result = irisService.getIrisBySpecies( SPECIES, defaultPagig );
 
 		assertEquals( result.blockFirst().getId(), ID );
-		assertEquals( result.count().block().toString(), "1" );
-
-		Flux<IrisDTO>result2 = irisService.getIrisBySpecies( SPECIES2 );
-
-		assertEquals( result2.blockFirst().getId(), ID2 );
-		assertEquals( result2.count().block().toString(), "1" );
-
-		verify( irisMapper, times( 4 ) ).toIrisDTO( any() );
-		verify( irisRepository, times( 2 ) ).findBySpecies( any() );
+		assertEquals( result.count().block().toString(), "2" );
+		verify( irisRepository, times( 1 ) ).retrieveBySpeciesPageable( any(), any() );
 	}
 }
