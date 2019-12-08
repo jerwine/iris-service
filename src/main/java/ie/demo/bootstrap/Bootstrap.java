@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import ie.demo.bootstrap.model.IrisCSV;
 import ie.demo.repository.IrisRepository;
 
 @Component
+@Profile("dev")
 public class Bootstrap implements CommandLineRunner {
 
 	@Value("classpath:iris.csv")
@@ -36,6 +38,9 @@ public class Bootstrap implements CommandLineRunner {
 		this.irisCSVMapper = irisCSVMapper;
 	}
 
+	/*
+	 * @see org.springframework.boot.CommandLineRunner#run(java.lang.String[])
+	 */
 	@Transactional
 	@Override
 	public void run( String... args ) throws Exception {

@@ -1,6 +1,7 @@
 package ie.demo.cotroller;
 
 import org.reactivestreams.Publisher;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +30,9 @@ public class IrisController {
 
 	@GetMapping()
 	@ResponseStatus( HttpStatus.OK )
-	public Flux<IrisDTO> getAllIrises() {
-		return irisService.getAllIris();
+	public Flux<IrisDTO> getAllIrises( @RequestParam( name = "page", defaultValue = "0", required = false ) int page,
+			@RequestParam( name = "size", defaultValue = "10", required = false ) int size ) {
+		return irisService.getAllIris( PageRequest.of( page, size ) );
 	}
 
 	@GetMapping("/{id}")
@@ -38,10 +41,18 @@ public class IrisController {
 		return irisService.getIrisById( id );
 	}
 
+	@GetMapping("/species")
+	@ResponseStatus( HttpStatus.OK )
+	public Flux<IrisDTO> getAllSpecies() {
+		return irisService.getAllSpecies();
+	}
+
 	@GetMapping("/species/{species}")
 	@ResponseStatus( HttpStatus.OK )
-	public Flux<IrisDTO> getIrisBySpecies( @PathVariable String species ) {
-		return irisService.getIrisBySpecies( species );
+	public Flux<IrisDTO> getIrisBySpecies( @PathVariable String species,
+		@RequestParam( name = "page", defaultValue = "0", required = false ) int page,
+		@RequestParam( name = "size", defaultValue = "10", required = false ) int size) {
+		return irisService.getIrisBySpecies( species, PageRequest.of( page, size ) );
 	}
 
 	@PostMapping()

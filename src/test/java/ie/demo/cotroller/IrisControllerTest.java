@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import ie.demo.api.model.IrisDTO;
@@ -18,6 +19,8 @@ public class IrisControllerTest {
 	WebTestClient webTestClient;
 	IrisController irisController;
 	IrisService irisService;
+
+	static PageRequest defaultPagig = PageRequest.of( 0, 10 );
 
 	@Before
 	public void setUp() throws Exception {
@@ -49,7 +52,7 @@ public class IrisControllerTest {
 
 	@Test
 	public void getAllIrises() {
-		BDDMockito.given( irisService.getAllIris() )
+		BDDMockito.given( irisService.getAllIris( defaultPagig ) )
 			.willReturn(
 				Flux.just( 
 					IrisDTO.builder()
@@ -70,8 +73,23 @@ public class IrisControllerTest {
 	}
 
 	@Test
+	public void getAllSpecies() {
+		BDDMockito.given( irisService.getAllSpecies() )
+			.willReturn( Flux.just( 
+					IrisDTO.builder().species( "setosa" ).build(),
+					IrisDTO.builder().species( "versicolor" ).build(),
+					IrisDTO.builder().species( "virginica" ).build() ) );
+
+		webTestClient.get()
+			.uri( "/irises/species" )
+			.exchange()
+			.expectBodyList( IrisDTO.class )
+			.hasSize( 3 );
+	}
+
+	@Test
 	public void getIrisBySpecies() {
-		BDDMockito.given( irisService.getIrisBySpecies( "setosa" ) )
+		BDDMockito.given( irisService.getIrisBySpecies( "setosa", defaultPagig ) )
 			.willReturn(
 				Flux.just( 
 					IrisDTO.builder()
