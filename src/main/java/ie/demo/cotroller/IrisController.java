@@ -28,6 +28,12 @@ public class IrisController {
 		this.irisService = irisService;
 	}
 
+	/**
+	 * Retrieve all the Irises, by default the first 10
+	 * @param page - optional
+	 * @param size - optional
+	 * @return
+	 */
 	@GetMapping()
 	@ResponseStatus( HttpStatus.OK )
 	public Flux<IrisDTO> getAllIrises( @RequestParam( name = "page", defaultValue = "0", required = false ) int page,
@@ -35,12 +41,21 @@ public class IrisController {
 		return irisService.getAllIris( PageRequest.of( page, size ) );
 	}
 
+	/**
+	 * Retrieve an Iris identified by the ID
+	 * @param id
+	 * @return
+	 */
 	@GetMapping("/{id}")
 	@ResponseStatus( HttpStatus.OK )
 	public Mono<IrisDTO> getIris( @PathVariable String id ) {
 		return irisService.getIrisById( id );
 	}
 
+	/**
+	 * Get all the species
+	 * @return
+	 */
 	@GetMapping("/species")
 	@ResponseStatus( HttpStatus.OK )
 	public Flux<IrisDTO> getAllSpecies() {
@@ -55,12 +70,22 @@ public class IrisController {
 		return irisService.getIrisBySpecies( species, PageRequest.of( page, size ) );
 	}
 
+	/**
+	 * Create/Update an Iris
+	 * @param irisStream
+	 * @return
+	 */
 	@PostMapping()
 	@ResponseStatus( HttpStatus.CREATED )
 	public Flux<IrisDTO> saveOrUpdateIris( @RequestBody Publisher<IrisDTO> irisStream ) {
 		return irisService.saveIris( irisStream );
 	}
 
+	/**
+	 * Delete an Iris identified by the ID
+	 * @param id
+	 * @return
+	 */
 	@DeleteMapping("/{id}")
 	@ResponseStatus( HttpStatus.OK )
 	public Mono<Void> deleteIris( @PathVariable String id ) {
