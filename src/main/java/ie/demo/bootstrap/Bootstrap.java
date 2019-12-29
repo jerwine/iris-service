@@ -2,10 +2,9 @@ package ie.demo.bootstrap;
 
 import static ie.demo.bootstrap.model.IrisCSV.IRIS_CSV_COLUMS;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -63,7 +62,7 @@ public class Bootstrap implements CommandLineRunner {
 		irisCSVstrategy.setColumnMapping( IRIS_CSV_COLUMS );
 
 		/* Set up the reader of the CSV file */
-		Reader reader = Files.newBufferedReader( Paths.get( resourceFile.getFile().toURI() ) );
+		BufferedReader reader = new BufferedReader( new InputStreamReader( resourceFile.getInputStream() ) );
 
 		/* Built up the mapping */
 		CsvToBean<IrisCSV> csvToBean = new CsvToBeanBuilder<IrisCSV>( reader )
