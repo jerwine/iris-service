@@ -1,4 +1,4 @@
-FROM openjdk
+FROM openjdk:11
 
 VOLUME /tmp
 ADD maven/iris-service-0.0.1-SNAPSHOT.jar iris-service-0.0.1-SNAPSHOT.jar
