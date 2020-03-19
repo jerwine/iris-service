@@ -10,13 +10,6 @@ import reactor.core.publisher.Flux;
 public interface IrisRepository extends ReactiveMongoRepository<Iris, String> {
 
 	/**
-	 * Find Irises by the species
-	 * @param species
-	 * @return
-	 */
-	Flux<Iris> findBySpecies( String species );
-
-	/**
 	 * Retrieve all the Irises restricted by the pageable parameter
 	 * @param pageable
 	 * @return

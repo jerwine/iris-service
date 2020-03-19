@@ -1,7 +1,6 @@
 package ie.demo.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,17 +8,15 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mockito;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import ie.demo.api.mapper.IrisMapper;
 import ie.demo.api.mapper.IrisSpeciesMapper;
@@ -30,8 +27,8 @@ import ie.demo.service.IrisService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RunWith(SpringRunner.class)
 @DataMongoTest
+@TestInstance( Lifecycle.PER_CLASS )
 public class IrisServiceImplTest {
 
 	IrisMapper irisMapper;
@@ -90,7 +87,7 @@ public class IrisServiceImplTest {
 
 	static final PageRequest defaultPagig = PageRequest.of( 1, 10 );
 
-	@Before
+	@BeforeAll
 	public void setUp() throws Exception {
 		irisMapper = Mockito.mock( IrisMapper.class );
 		irisRepository = Mockito.mock( IrisRepository.class );
@@ -107,8 +104,8 @@ public class IrisServiceImplTest {
 
 		IrisDTO result = irisService.getIrisById( ID ).block();
 
-		assertEquals( result.getId(), ID );
-		assertTrue( result.equals( IRISDTO ) );
+		assertThat( result.getId() ).isEqualTo( ID );
+		assertThat( result.equals( IRISDTO ) ).isTrue();
 	}
 
 	@Test
@@ -120,11 +117,11 @@ public class IrisServiceImplTest {
 
 		Flux<IrisDTO> result = irisService.getAllIris( defaultPagig );
 
-		assertEquals( result.blockFirst().getId(), ID );
-		assertEquals( result.blockLast().getId(), ID2 );
-		assertEquals( result.count().block().toString(), "2" );
-		assertTrue( result.blockFirst().equals( IRISDTO ) );
-		assertTrue( result.blockLast().equals( IRISDTO2 ) );
+		assertThat( result.blockFirst().getId() ).isEqualTo( ID );
+		assertThat( result.blockLast().getId() ).isEqualTo( ID2 );
+		assertThat( result.count().block().toString() ).isEqualTo( "2" );
+		assertThat( result.blockFirst() ).isEqualTo( IRISDTO );
+		assertThat( result.blockLast() ).isEqualTo( IRISDTO2 );
 	}
 
 	@Test
@@ -137,11 +134,11 @@ public class IrisServiceImplTest {
 
 		Flux<IrisDTO>result = irisService.getAllSpecies();
 
-		assertEquals( result.blockFirst().getSpecies(), SPECIES );
-		assertEquals( result.blockLast().getSpecies(), SPECIES3 );
-		assertEquals( result.count().block().toString(), "3" );
-		assertTrue( result.blockFirst().equals( SPECIES_1 ) );
-		assertTrue( result.blockLast().equals( SPECIES_3 ) );
+		assertThat( result.blockFirst().getSpecies() ).isEqualTo( SPECIES );
+		assertThat( result.blockLast().getSpecies() ).isEqualTo( SPECIES3 );
+		assertThat( result.count().block().toString() ).isEqualTo( "3" );
+		assertThat( result.blockFirst() ).isEqualTo( SPECIES_1 );
+		assertThat( result.blockLast() ).isEqualTo( SPECIES_3 );
 	}
 
 	@Test
@@ -153,8 +150,14 @@ public class IrisServiceImplTest {
 
 		Flux<IrisDTO>result = irisService.getIrisBySpecies( SPECIES, defaultPagig );
 
-		assertEquals( result.blockFirst().getId(), ID );
-		assertEquals( result.count().block().toString(), "2" );
+		assertThat( result.blockFirst().getId() ).isEqualTo( ID );
+		assertThat( result.count().block().toString() ).isEqualTo( "2" );
 		verify( irisRepository, times( 1 ) ).retrieveBySpeciesPageable( any(), any() );
+	}
+
+	@Test
+	public void testDeleteIris() {
+		irisService.deleteIris( "random" );
+		verify( irisRepository, times( 1 ) ).deleteById( "random" );
 	}
 }

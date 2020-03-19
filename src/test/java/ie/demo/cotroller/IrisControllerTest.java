@@ -2,8 +2,10 @@ package ie.demo.cotroller;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import ie.demo.service.IrisService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@TestInstance( Lifecycle.PER_CLASS )
 public class IrisControllerTest {
 
 	WebTestClient webTestClient;
@@ -22,7 +25,7 @@ public class IrisControllerTest {
 
 	static PageRequest defaultPagig = PageRequest.of( 0, 10 );
 
-	@Before
+	@BeforeAll
 	public void setUp() throws Exception {
 		irisService = Mockito.mock( IrisService.class );
 		irisController = new IrisController( irisService );
@@ -89,7 +92,8 @@ public class IrisControllerTest {
 
 	@Test
 	public void getIrisBySpecies() {
-		BDDMockito.given( irisService.getIrisBySpecies( "setosa", defaultPagig ) )
+		String species = "setosa";
+		BDDMockito.given( irisService.getIrisBySpecies( species, defaultPagig ) )
 			.willReturn(
 				Flux.just( 
 					IrisDTO.builder()
@@ -97,13 +101,13 @@ public class IrisControllerTest {
 						.petalWidth( new BigDecimal( "0.2" ) )
 						.sepalLength( new BigDecimal( "5.1" ) )
 						.sepalWidth( new BigDecimal( "3.5" ) )
-						.species( "setosa" )
+						.species( species )
 						.build()
 					)
 			);
 
 		webTestClient.get()
-			.uri( "/irises/species/setosa" )
+			.uri( "/irises/species/" + species )
 			.exchange()
 			.expectBodyList( IrisDTO.class )
 			.hasSize( 1 );
@@ -133,9 +137,7 @@ public class IrisControllerTest {
 
 	@Test
 	public void deleteIris() {
-
 		String id = "randomid";
-
 		BDDMockito.given( irisService.deleteIris( id ) )
 			.willReturn( Mono.empty() );
 

@@ -6,10 +6,12 @@ import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvNumber;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class IrisCSV {

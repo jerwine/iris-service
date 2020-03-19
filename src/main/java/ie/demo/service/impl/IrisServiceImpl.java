@@ -31,7 +31,7 @@ public class IrisServiceImpl implements IrisService {
 	}
 
 	/*
-	 * @see ie.demo.service.IrisService#getIrisById(org.reactivestreams.Publisher)
+	 * @see ie.demo.service.IrisService#getIrisById(java.lang.String)
 	 */
 	@Override
 	public Mono<IrisDTO> getIrisById( String id ) {
@@ -73,7 +73,7 @@ public class IrisServiceImpl implements IrisService {
 	}
 
 	/*
-	 * @see ie.demo.service.IrisService#deleteIris(org.reactivestreams.Publisher)
+	 * @see ie.demo.service.IrisService#deleteIris(java.lang.String)
 	 */
 	@Override
 	public Mono<Void> deleteIris( String id ) {
