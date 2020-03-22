@@ -1,4 +1,4 @@
-package ie.demo.cotroller;
+package ie.demo.cotroller.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
