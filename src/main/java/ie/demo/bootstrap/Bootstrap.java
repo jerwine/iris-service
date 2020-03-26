@@ -21,9 +21,11 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import ie.demo.bootstrap.mapper.IrisCSVMapper;
 import ie.demo.bootstrap.model.IrisCSV;
 import ie.demo.repository.IrisRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Profile("dev")
+@Slf4j
 public class Bootstrap implements CommandLineRunner {
 
 	@Value("classpath:iris.csv")
@@ -44,9 +46,13 @@ public class Bootstrap implements CommandLineRunner {
 	@Override
 	public void run( String... args ) throws Exception {
 
+		log.info( "Starting Bootstrap.run().." );
+
 		irisRepository.deleteAll().block();
 
 		readFile().forEach( irisCSV -> { irisRepository.save( irisCSVMapper.toIris( irisCSV ) ).block(); } );
+
+		log.info( "Bootstrap.run() finished.." );
 	}
 
 	/**
